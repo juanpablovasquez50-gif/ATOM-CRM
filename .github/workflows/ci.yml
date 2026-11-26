@@ -1,7 +1,7 @@
 name: ATOM CRM CI
 on:
   push:
-    branches: [main, production-readiness]
+    branches: [main, production-readiness, feature/full-crm-suite]
   pull_request:
     branches: [main]
 jobs:
