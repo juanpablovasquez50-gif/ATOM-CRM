@@ -13,7 +13,8 @@ export default function CRMModules({page,workspaceId,userId,leads}:{page:string,
  const table:Record<string,string>={'Cotizaciones':'quotes','Proyectos':'projects','Finanzas':'payments','Metas':'sales_goals','Agenda':'reminders','Actividad':'activities'};
  const dbtable=table[page];
  const load=async()=>{if(!supabase||!workspaceId||!dbtable)return;setLoading(true);const {data,error}=await supabase.from(dbtable).select('*').eq('workspace_id',workspaceId).order('created_at',{ascending:false});if(error)setError(error.message);else setRows(data||[]);setLoading(false);};
- useEffect(()=>{void load();},[page,workspaceId]);
+ const loadExpenses=async()=>{if(!supabase||!workspaceId)return;const {data,error}=await supabase.from('expenses').select('*').eq('workspace_id',workspaceId).order('created_at',{ascending:false});if(error)setError(error.message);else setExpenseRows(data||[]);};
+ useEffect(()=>{void load();if(page==='Finanzas')void loadExpenses();},[page,workspaceId]);
  const add=async(payload:Row)=>{if(!supabase||!workspaceId){setError('Workspace no disponible');return;}const {error}=await supabase.from(dbtable).insert({...payload,workspace_id:workspaceId,created_by:userId}).select().single();if(error){setError(error.message);return;}setError('');void load();};
  const update=async(id:string,payload:Row)=>{if(!supabase||!workspaceId)return;const {error}=await supabase.from(dbtable).update(payload).eq('id',id).eq('workspace_id',workspaceId);if(error)setError(error.message);else void load();};
  const addExpense=async(payload:Row)=>{if(!supabase||!workspaceId){setError('Workspace no disponible');return;}const {error}=await supabase.from('expenses').insert({...payload,workspace_id:workspaceId,created_by:userId}).select().single();if(error)setError(error.message);else{setError('');void loadExpenses();}};
